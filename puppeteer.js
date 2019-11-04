@@ -81,6 +81,15 @@ async function main (numberOfReceipes) {
       return Number.parseInt(number)
     }
 
+    const getRecipeImageURL = async () => {
+      await page.waitForSelector('.recipe-image-square__image')
+      const image = await page.evaluate(() => {
+        const element = document.querySelector('.recipe-image-square__image')
+        return element.style.backgroundImage
+      })
+      return image
+    }
+
     const getRecipe = async (url) => {
       const recipe = {
         title: '',
@@ -89,6 +98,8 @@ async function main (numberOfReceipes) {
         steps: [],
         nutritional: 0,
         numberOfPortions: 0,
+        url: url,
+        imageURL: ''
       }
 
       await page.goto(url)
@@ -99,6 +110,7 @@ async function main (numberOfReceipes) {
       recipe.steps = await getRecipeSteps()
       recipe.nutritional = await getRecipeNutritional()
       recipe.numberOfPortions = await getRecipeNumberOfPortions()
+      recipe.imageURL = await getRecipeImageURL()
 
       return recipe
     }
@@ -112,14 +124,14 @@ async function main (numberOfReceipes) {
       length = await page.evaluate(() => document.querySelectorAll('header>h2>a').length)
     }
 
-    const links = await page.evaluate(() => {
+    let links = await page.evaluate(() => {
       let elements = Array.from(document.querySelectorAll('header>h2>a'))
       let links = elements.map(element => { return element.href })
       return links
     })
+    links = links.slice(0, numberOfReceipes)
 
     const recipes = []
-    // recipes.push(await getRecipe(links[0]))
     for (const link of links) {
       const recepie = await getRecipe(link)
       if (recepie.numberOfPortions) {
@@ -127,7 +139,6 @@ async function main (numberOfReceipes) {
       } else {
         console.log('Recepie with undefined portions!')
       }
-      // recipes.push(await getRecipe(link))
     }
     console.log('recepies fetched and constructed')
     return recipes
