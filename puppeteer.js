@@ -36,6 +36,18 @@ async function main (numberOfReceipes) {
       return await getTextContentFromSelector('.recipepage__headline')
     }
 
+    const getRecipeCookingTime = async () => {
+      const text = await getTextContentFromSelector('.col-12.recipe-meta.recipe-meta--header')
+      const cookingTime = Number(text.split('UNDER ')[1].split(' ')[0])
+      return cookingTime
+    }
+
+    const getRecipeDifficulty = async () => {
+      const text = await getTextContentFromSelector('.col-12.recipe-meta.recipe-meta--header')
+      const cookingDifficulty = text.split('| ')[1].split(' ')[0]
+      return cookingDifficulty
+    }
+
     const getRecipeIngrients = async () => {
       await page.waitForSelector('.ingredients__list')
 
@@ -94,6 +106,8 @@ async function main (numberOfReceipes) {
       const recipe = {
         title: '',
         id: '',
+        cookingTime: 0,
+        difficulty: '',
         ingredients: [],
         steps: [],
         nutritional: 0,
@@ -105,6 +119,8 @@ async function main (numberOfReceipes) {
       await page.goto(url)
       recipe.title = await getRecipeTitle()
       recipe.id = uuid(recipe.title, 'b893c16d-017a-4fe7-a9a8-7789d505a1ae')
+      recipe.cookingTime = await getRecipeCookingTime()
+      recipe.difficulty = await getRecipeDifficulty()
       console.log('Getting recepie ' + recipe.title)
       recipe.ingredients = await getRecipeIngrients()
       recipe.steps = await getRecipeSteps()
