@@ -15,7 +15,7 @@ async function main (numberOfReceipes, debug) {
   try {
     console.log(await browser.version())
     const page = await browser.newPage()
-    page.on('console', consoleObj => console.log(consoleObj.text()))
+    // page.on('console', consoleObj => console.log(consoleObj.text()))
     if (!debug) {
       page.setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1");
       await page.setRequestInterception(true)
@@ -192,12 +192,12 @@ async function main (numberOfReceipes, debug) {
 
       await page.goto(url)
       recipe.title = await getRecipeTitle()
+      console.log('Getting recepie ' + recipe.title)
       recipe.specialDiets = await getRecipeSpecialDiets()
       recipe.description = await getRecipeDescription()
       recipe.id = uuid(recipe.title, 'b893c16d-017a-4fe7-a9a8-7789d505a1ae')
       recipe.cookingTime = await getRecipeCookingTime()
       recipe.difficulty = await getRecipeDifficulty()
-      console.log('Getting recepie ' + recipe.title)
       recipe.ingredients = await getRecipeIngrients()
       recipe.steps = await getRecipeSteps()
       recipe.nutritional = await getRecipeNutritional()
@@ -224,7 +224,10 @@ async function main (numberOfReceipes, debug) {
     links = links.slice(0, numberOfReceipes)
 
     const recipes = []
+    let counter = 0
     for (const link of links) {
+      counter++
+      console.log('Recepie number ' + counter)
       const recepie = await getRecipe(link)
       if (recepie.numberOfPortions) {
         recipes.push(recepie)
@@ -239,7 +242,7 @@ async function main (numberOfReceipes, debug) {
   }
 }
 
-main(20, false).then((result) => {
+main(400, false).then((result) => {
   console.log('writing to file')
   fs.writeFileSync('result.json', JSON.stringify(result, null, 2) + '\n')
 }).catch((err) => {
