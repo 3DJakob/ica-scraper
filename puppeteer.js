@@ -40,7 +40,11 @@ async function main (numberOfReceipes, debug) {
     }
 
     const getContentFromSelector = async (selector, waitForSelector = selector) => {
-      await page.waitForSelector(waitForSelector)
+      try {
+        await page.waitForSelector(waitForSelector)
+      } catch (error) {
+        return null
+      }
       const text = await page.evaluate((selector) => {
         return document.querySelector(selector) ? document.querySelector(selector).content : null
       }, selector)
@@ -63,7 +67,11 @@ async function main (numberOfReceipes, debug) {
     }
 
     getRecipeDescription = async () => {
-      return await getContentFromSelector('[name=description]')
+      const description = await getContentFromSelector('[name=description]')
+      if (description == null) {
+        console.log('Recepie without description.')
+      }
+      return await description
     }
 
     const getRecipeCookingTime = async () => {
