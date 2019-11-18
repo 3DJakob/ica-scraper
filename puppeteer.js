@@ -82,35 +82,37 @@ async function main (numberOfReceipes, debug) {
       await page.waitForSelector('.howto-steps')
 
       const stepElements = await page.$$('.cooking-step__content')
-        for (const stepElement of stepElements) {
-          const obj = {step: '', timers: []}
+      for (const stepElement of stepElements) {
+        const obj = {step: '', timers: []}
 
-          obj.step = await page.evaluate(stepElement => stepElement.childNodes[0].textContent, stepElement)
-          const line = await page.evaluate(stepElement => stepElement.innerHTML, stepElement)
+        obj.step = await page.evaluate(stepElement => stepElement.childNodes[0].textContent, stepElement)
+        const line = await page.evaluate(stepElement => stepElement.innerHTML, stepElement)
 
-          if (line.includes('Starta timer')) {
-            const numberOfTimers = await page.evaluate(() => document.querySelector('.cooking-step__content__timers').childNodes.length)
-            console.log('there are this many timers: ' + numberOfTimers)
+        if (line.includes('Starta timer')) {
+          const numberOfTimers = await page.evaluate(() => document.querySelector('.cooking-step__content__timers').childNodes.length)
+          console.log('there are this many timers for this step: ' + numberOfTimers)
 
 
-
-            const timerElements = await stepElement.$$eval('.button')
-            // console.log('buttons found')
-            for (const timerElement of timerElements) {
-              // console.log(timerElement.innerHTML)
-              // await page.evaluate(timerElement => timerElement.click())
-              await timerElement.click()
-              console.log('Timer clicked')
-              await page.waitForSelector('.pl-modal__window')
-              console.log('selector found')
-              const value = await page.evaluate(() => document.querySelector('.timer-box__timer-minutes').value)
-              await page.evaluate(() => document.querySelector('.pl-modal__close-button').click())
-              console.error('The timer is: ' + value)
-              obj.timers.push(value)
-            }
+          console.log('tst')
+          const timerElements = await page.$$eval('.button')
+          
+          console.log('tst2')
+          // console.log('buttons found')
+          for (const timerElement of timerElements) {
+            // console.log(timerElement.innerHTML)
+            // await page.evaluate(timerElement => timerElement.click())
+            await timerElement.click()
+            console.log('Timer clicked')
+            await page.waitForSelector('.pl-modal__window')
+            console.log('selector found')
+            const value = await page.evaluate(() => document.querySelector('.timer-box__timer-minutes').value)
+            await page.evaluate(() => document.querySelector('.pl-modal__close-button').click())
+            console.error('The timer is: ' + value)
+            obj.timers.push(value)
           }
-          ingredients.push(obj)
         }
+          ingredients.push(obj)
+      }
 
       ingredients.forEach(element => {
         console.log(element.timers[0])
