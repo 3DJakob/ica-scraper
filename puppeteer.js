@@ -4,23 +4,29 @@ const puppeteer = require('puppeteer')
 
 const parseIcaItem = require('./lib/item-parser')
 
-async function main (numberOfReceipes) {
-  // const browser = await puppeteer.launch({headless: false, args: [ '--single-process' ]});
-  const browser = await puppeteer.launch()
-
+async function main (numberOfReceipes, debug) {
+  let browser
+  if (debug) {
+    browser = await puppeteer.launch({headless: false})
+  } else {
+    browser = await puppeteer.launch()
+  }
+  
   try {
     console.log(await browser.version())
     const page = await browser.newPage()
-    page.on('console', consoleObj => console.log(consoleObj.text()));
-    // page.setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1");
-    await page.setRequestInterception(true)
-    page.on('request', (request) => {
-      if (['image', 'stylesheet', 'font'].includes(request.resourceType())) {
-        request.abort();
-      } else {
-        request.continue();
-      }
-    })
+    page.on('console', consoleObj => console.log(consoleObj.text()))
+    if (!debug) {
+      page.setUserAgent("Mozilla/5.0 (iPhone; CPU iPhone OS 9_1 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13B143 Safari/601.1");
+      await page.setRequestInterception(true)
+      page.on('request', (request) => {
+        if (['image', 'stylesheet', 'font'].includes(request.resourceType())) {
+          request.abort();
+        } else {
+          request.continue();
+        }
+      })
+    }
     console.log('page opened, going to url')
     await page.goto('https://www.ica.se/recept/middag/')
     // await page.waitForNavigation()
@@ -201,7 +207,7 @@ async function main (numberOfReceipes) {
   }
 }
 
-main(20).then((result) => {
+main(20, true).then((result) => {
   console.log('writing to file')
   fs.writeFileSync('result.json', JSON.stringify(result, null, 2) + '\n')
 }).catch((err) => {
