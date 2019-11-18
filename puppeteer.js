@@ -51,6 +51,11 @@ async function main (numberOfReceipes, debug) {
       return await getContentFromSelector('[name=description]')
     }
 
+    const getRecipeSpecialDiets = async () => {
+      console.log('the diets:' + await getContentFromSelector('[name=Specialkost]'))
+      return await getContentFromSelector('[name=Specialkost]')
+    }
+
     getRecipeDescription = async () => {
       return await getTextContentFromSelector('.recipepage__headline')
     }
@@ -160,6 +165,7 @@ async function main (numberOfReceipes, debug) {
         title: '',
         description: '',
         id: '',
+        specialDiets: '',
         cookingTime: 0,
         difficulty: '',
         ingredients: [],
@@ -172,6 +178,7 @@ async function main (numberOfReceipes, debug) {
 
       await page.goto(url)
       recipe.title = await getRecipeTitle()
+      recipe.specialDiets = await getRecipeSpecialDiets()
       recipe.description = await getRecipeDescription()
       recipe.id = uuid(recipe.title, 'b893c16d-017a-4fe7-a9a8-7789d505a1ae')
       recipe.cookingTime = await getRecipeCookingTime()
