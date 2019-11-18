@@ -48,16 +48,22 @@ async function main (numberOfReceipes, debug) {
     }
 
     const getRecipeTitle = async () => {
-      return await getContentFromSelector('[name=description]')
+      return await getTextContentFromSelector('.recipepage__headline')
     }
 
     const getRecipeSpecialDiets = async () => {
-      console.log('the diets:' + await getContentFromSelector('[name=Specialkost]'))
-      return await getContentFromSelector('[name=Specialkost]')
+      const diets = await page.evaluate(() => {
+        const specialDietsElements = Array.from(document.querySelectorAll('[name=Specialkost]'))
+        const res = specialDietsElements.map(element => {
+          return element.content
+        })
+        return res
+      })
+      return diets
     }
 
     getRecipeDescription = async () => {
-      return await getTextContentFromSelector('.recipepage__headline')
+      return await getContentFromSelector('[name=description]')
     }
 
     const getRecipeCookingTime = async () => {
