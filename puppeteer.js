@@ -11,7 +11,7 @@ async function main (numberOfReceipes, debug) {
   } else {
     browser = await puppeteer.launch()
   }
-  
+
   try {
     console.log(await browser.version())
     const page = await browser.newPage()
@@ -89,34 +89,29 @@ async function main (numberOfReceipes, debug) {
         const line = await page.evaluate(stepElement => stepElement.innerHTML, stepElement)
 
         if (line.includes('Starta timer')) {
-          const numberOfTimers = await page.evaluate(() => document.querySelector('.cooking-step__content__timers').childNodes.length)
-          console.log('there are this many timers for this step: ' + numberOfTimers)
-
-
-          console.log('tst')
-          const timerElements = await page.$$eval('.button')
-          
-          console.log('tst2')
-          // console.log('buttons found')
+          const timerElements = await stepElement.$$('.button')
           for (const timerElement of timerElements) {
-            // console.log(timerElement.innerHTML)
-            // await page.evaluate(timerElement => timerElement.click())
             await timerElement.click()
-            console.log('Timer clicked')
             await page.waitForSelector('.pl-modal__window')
-            console.log('selector found')
-            const value = await page.evaluate(() => document.querySelector('.timer-box__timer-minutes').value)
+            const value = Number(await page.evaluate(() => document.querySelector('.timer-box__timer-minutes.js-track-cookmode-timerminutes').value))
             await page.evaluate(() => document.querySelector('.pl-modal__close-button').click())
-            console.error('The timer is: ' + value)
+            await page.evaluate(() => {
+              const parent = document.querySelector('.pl-modal__close-button').parentNode
+              parent.removeChild(parent.childNodes[0])
+            })
             obj.timers.push(value)
           }
         }
           ingredients.push(obj)
       }
 
-      ingredients.forEach(element => {
-        console.log(element.timers[0])
-      })
+      // For debugging timers
+      // ingredients.forEach(element => {
+      //   console.log(element.step)
+      //   element.timers.forEach(timer => {
+      //     console.log('Timer: ' + timer)
+      //   })
+      // })
       return ingredients
     }
 
@@ -209,7 +204,7 @@ async function main (numberOfReceipes, debug) {
   }
 }
 
-main(20, true).then((result) => {
+main(20, false).then((result) => {
   console.log('writing to file')
   fs.writeFileSync('result.json', JSON.stringify(result, null, 2) + '\n')
 }).catch((err) => {
