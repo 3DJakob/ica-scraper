@@ -38,8 +38,12 @@ async function main (numberOfReceipes) {
 
     const getRecipeCookingTime = async () => {
       const text = await getTextContentFromSelector('.col-12.recipe-meta.recipe-meta--header')
-      const cookingTime = Number(text.split('UNDER ')[1].split(' ')[0])
-      return cookingTime
+      if (text.includes('UNDER')) {
+        return Number(text.split('UNDER ')[1].split(' ')[0])
+      } else if (text.includes('ÖVER')) {
+        return Number(text.split('ÖVER ')[1].split(' ')[0])
+      }
+      return null
     }
 
     const getRecipeDifficulty = async () => {
