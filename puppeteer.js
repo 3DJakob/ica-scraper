@@ -39,7 +39,19 @@ async function main (numberOfReceipes, debug) {
       return text
     }
 
+    const getContentFromSelector = async (selector, waitForSelector = selector) => {
+      await page.waitForSelector(waitForSelector)
+      const text = await page.evaluate((selector) => {
+        return document.querySelector(selector) ? document.querySelector(selector).content : null
+      }, selector)
+      return text
+    }
+
     const getRecipeTitle = async () => {
+      return await getContentFromSelector('[name=description]')
+    }
+
+    getRecipeDescription = async () => {
       return await getTextContentFromSelector('.recipepage__headline')
     }
 
@@ -146,6 +158,7 @@ async function main (numberOfReceipes, debug) {
     const getRecipe = async (url) => {
       const recipe = {
         title: '',
+        description: '',
         id: '',
         cookingTime: 0,
         difficulty: '',
@@ -159,6 +172,7 @@ async function main (numberOfReceipes, debug) {
 
       await page.goto(url)
       recipe.title = await getRecipeTitle()
+      recipe.description = await getRecipeDescription()
       recipe.id = uuid(recipe.title, 'b893c16d-017a-4fe7-a9a8-7789d505a1ae')
       recipe.cookingTime = await getRecipeCookingTime()
       recipe.difficulty = await getRecipeDifficulty()
