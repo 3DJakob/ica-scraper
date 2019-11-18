@@ -48,7 +48,8 @@ async function main (numberOfReceipes) {
 
     const getRecipeDifficulty = async () => {
       const text = await getTextContentFromSelector('.col-12.recipe-meta.recipe-meta--header')
-      const cookingDifficulty = text.split('| ')[1].split(' ')[0]
+      let cookingDifficulty = text.split('| ')[1].split(' ')[0]
+      cookingDifficulty = cookingDifficulty.replace(/(\r\n|\n|\r)/gm, "")
       return cookingDifficulty
     }
 
